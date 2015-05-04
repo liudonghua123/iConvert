@@ -1,0 +1,188 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.effect.*?>
+<?import javafx.geometry.*?>
+<?import javafx.scene.*?>
+<?import javafx.scene.control.*?>
+<?import java.lang.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.layout.AnchorPane?>
+
+<BorderPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="600.0" minWidth="700.0" prefHeight="600.0" prefWidth="700.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1">
+   <top>
+      <MenuBar BorderPane.alignment="CENTER">
+        <menus>
+          <Menu mnemonicParsing="false" text="%app.menu.file">
+            <items>
+              <MenuItem fx:id="menuExit" mnemonicParsing="false" onAction="#handleExit" text="%app.menu.file.exit" />
+            </items>
+          </Menu>
+          <Menu mnemonicParsing="false" text="%app.menu.setting">
+            <items>
+                  <Menu fx:id="menuLanguage" mnemonicParsing="false" text="%app.menu.setting.language">
+                     <items>
+                        <RadioMenuItem mnemonicParsing="false" text="%app.menu.setting.language.en_US">
+                           <toggleGroup>
+                              <ToggleGroup fx:id="toggleGroupLanguage" />
+                           </toggleGroup></RadioMenuItem>
+                        <RadioMenuItem mnemonicParsing="false" text="%app.menu.setting.language.zh_CN" toggleGroup="$toggleGroupLanguage" />
+                     </items>
+                  </Menu>
+                  <Menu fx:id="menuTheme" mnemonicParsing="false" text="%app.menu.setting.theme">
+                     <items>
+                        <RadioMenuItem mnemonicParsing="false" text="%app.menu.setting.theme.default">
+                           <toggleGroup>
+                              <ToggleGroup fx:id="toggleGroupTheme" />
+                           </toggleGroup></RadioMenuItem>
+                        <RadioMenuItem mnemonicParsing="false" text="%app.menu.setting.theme.black" toggleGroup="$toggleGroupTheme" />
+                     </items>
+                  </Menu>
+            </items>
+          </Menu>
+          <Menu mnemonicParsing="false" text="%app.menu.help">
+            <items>
+              <MenuItem fx:id="menuAbout" mnemonicParsing="false" onAction="#handleAbout" text="%app.menu.help.about" />
+            </items>
+          </Menu>
+        </menus>
+      </MenuBar>
+   </top>
+   <center>
+      <VBox fx:id="vBoxMainContainer" BorderPane.alignment="CENTER">
+         <children>
+            <TitledPane fx:id="titledPaneInput" animated="false" text="%app.main.input_pane.title">
+               <content>
+                  <GridPane vgap="5.0">
+                    <columnConstraints>
+                      <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" />
+                        <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" />
+                        <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" />
+                      <ColumnConstraints fillWidth="false" hgrow="SOMETIMES" minWidth="10.0" />
+                    </columnConstraints>
+                    <rowConstraints>
+                      <RowConstraints vgrow="SOMETIMES" />
+                      <RowConstraints vgrow="SOMETIMES" />
+                      <RowConstraints vgrow="SOMETIMES" />
+                        <RowConstraints vgrow="SOMETIMES" />
+                        <RowConstraints vgrow="SOMETIMES" />
+                        <RowConstraints vgrow="SOMETIMES" />
+                    </rowConstraints>
+                     <children>
+                        <Label text="%app.main.input_pane.select_input_dir_label">
+                           <GridPane.margin>
+                              <Insets left="10.0" />
+                           </GridPane.margin></Label>
+                        <TextField fx:id="textFieldInputDir" editable="false" GridPane.columnSpan="3" GridPane.rowIndex="1">
+                           <GridPane.margin>
+                              <Insets left="10.0" right="10.0" />
+                           </GridPane.margin></TextField>
+                        <Button fx:id="buttonInputDir" mnemonicParsing="false" onAction="#handleInputDirAction" text="%app.main.input_pane.select_input_dir_button_text" GridPane.columnIndex="3" GridPane.rowIndex="1">
+                           <GridPane.margin>
+                              <Insets left="10.0" />
+                           </GridPane.margin></Button>
+                        <CheckBox fx:id="checkBoxCustomOutput" mnemonicParsing="false" onAction="#handleCustomOutputAction" text="%app.main.input_pane.select_output_dir_checkbox_text" GridPane.rowIndex="2">
+                           <GridPane.margin>
+                              <Insets left="10.0" />
+                           </GridPane.margin></CheckBox>
+                        <TextField fx:id="textFieldOutputDir" disable="true" editable="false" GridPane.columnSpan="3" GridPane.rowIndex="3">
+                           <GridPane.margin>
+                              <Insets left="10.0" right="10.0" />
+                           </GridPane.margin></TextField>
+                        <Button fx:id="buttonOutputDir" disable="true" mnemonicParsing="false" onAction="#handleOutputDirAction" text="%app.main.input_pane.select_output_dir_button_text" GridPane.columnIndex="3" GridPane.rowIndex="3">
+                           <GridPane.margin>
+                              <Insets left="10.0" />
+                           </GridPane.margin></Button>
+                        <Button fx:id="buttonStart" disable="true" mnemonicParsing="false" onAction="#handleStartAction" text="%app.main.input_pane.start_converting" GridPane.rowIndex="5">
+                           <GridPane.margin>
+                              <Insets left="10.0" />
+                           </GridPane.margin></Button>
+                        <HBox alignment="CENTER_LEFT" GridPane.rowIndex="4">
+                           <children>
+                              <Label text="%app.main.input_pane.select_output_encoding_text" GridPane.rowIndex="4" />
+                              <ComboBox fx:id="comboBoxOutputEncoding" disable="true" prefWidth="150.0" GridPane.rowIndex="4">
+                                 <HBox.margin>
+                                    <Insets left="10.0" />
+                                 </HBox.margin>
+                              </ComboBox>
+                           </children>
+                           <GridPane.margin>
+                              <Insets left="10.0" />
+                           </GridPane.margin>
+                        </HBox>
+                     </children>
+                  </GridPane>
+               </content>
+            </TitledPane>
+            <TitledPane fx:id="titledPaneFilter" animated="false" text="%app.main.filter_pane.title">
+              <content>
+                  <VBox>
+                     <children>
+                        <GridPane vgap="5.0">
+                           <columnConstraints>
+                              <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" />
+                              <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" />
+                              <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" />
+                              <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" />
+                           </columnConstraints>
+                           <rowConstraints>
+                              <RowConstraints vgrow="SOMETIMES" />
+                              <RowConstraints vgrow="SOMETIMES" />
+                           </rowConstraints>
+                           <children>
+                              <CheckBox fx:id="checkBoxFilter1" mnemonicParsing="false" onAction="#handleFilterAction" text="%app.main.filter_pane.common_filter_1" />
+                              <CheckBox fx:id="checkBoxFilter2" mnemonicParsing="false" onAction="#handleFilterAction" selected="true" text="%app.main.filter_pane.common_filter_2" GridPane.columnIndex="1" />
+                              <CheckBox fx:id="checkBoxFilter3" mnemonicParsing="false" onAction="#handleFilterAction" selected="true" text="%app.main.filter_pane.common_filter_3" GridPane.columnIndex="2" />
+                              <CheckBox fx:id="checkBoxFilter4" mnemonicParsing="false" onAction="#handleFilterAction" text="%app.main.filter_pane.common_filter_4" GridPane.columnIndex="3" />
+                           </children>
+                           <VBox.margin>
+                              <Insets left="10.0" right="10.0" />
+                           </VBox.margin>
+                        </GridPane>
+                        <HBox alignment="CENTER_LEFT">
+                           <children>
+                              <CheckBox fx:id="checkBoxCustomFilter" mnemonicParsing="false" onAction="#handleCustomFilterAction" text="%app.main.filter_pane.checkbox_text" />
+                              <TextField fx:id="textFieldCustomFilter" disable="true" text="*.java; *.properties" HBox.hgrow="ALWAYS">
+                                 <HBox.margin>
+                                    <Insets left="10.0" />
+                                 </HBox.margin></TextField>
+                              <Button fx:id="buttonFilter" disable="true" minHeight="-Infinity" minWidth="-Infinity" mnemonicParsing="false" onAction="#handleDoCustomFilter" prefHeight="25.0" text="%app.main.filter_pane.do_filter">
+                                 <HBox.margin>
+                                    <Insets left="10.0" right="10.0" />
+                                 </HBox.margin>
+                              </Button>
+                           </children>
+                           <VBox.margin>
+                              <Insets left="10.0" right="10.0" />
+                           </VBox.margin>
+                        </HBox>
+                     </children>
+                  </VBox>
+              </content>
+            </TitledPane>
+            <TitledPane fx:id="titledPanePreview" animated="false" prefHeight="200.0" text="%app.main.preview_pane.title" VBox.vgrow="ALWAYS">
+              <content>
+                  <TreeView fx:id="treeViewPreview" AnchorPane.bottomAnchor="-10.0" AnchorPane.leftAnchor="10.0" AnchorPane.rightAnchor="10.0" AnchorPane.topAnchor="10.0">
+                     <padding>
+                        <Insets left="10.0" right="10.0" />
+                     </padding>
+                  </TreeView>
+              </content>
+            </TitledPane>
+         </children>
+      </VBox>
+   </center>
+   <bottom>
+      <HBox BorderPane.alignment="CENTER">
+         <children>
+            <ProgressBar fx:id="progressBarStatus" prefWidth="200.0" progress="0.0" />
+            <Label fx:id="labelStatus" text="%app.status.initialize_complete">
+               <HBox.margin>
+                  <Insets left="10.0" />
+               </HBox.margin></Label>
+         </children>
+         <BorderPane.margin>
+            <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
+         </BorderPane.margin>
+      </HBox>
+   </bottom>
+</BorderPane>
