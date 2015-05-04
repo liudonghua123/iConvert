@@ -286,34 +286,34 @@ public class MainPaneController extends Stage implements Initializable {
             byte[] buf = new byte[4096];
             UniversalDetector detector = new UniversalDetector(null);
             fileInfoWrappers.stream().filter(fileInfo -> !fileInfo.getIsDirectory())
-                    .forEachOrdered(fileInfo -> {
-                        FileInputStream fis = null;
-                        int nread = 0;
+                .forEachOrdered(fileInfo -> {
+                    FileInputStream fis = null;
+                    int nread = 0;
+                    try {
+                        fis = new FileInputStream(fileInfo.getFilePath());
+                        while ((nread = fis.read(buf)) > 0 && !detector.isDone()) {
+                            detector.handleData(buf, 0, nread);
+                        }
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    } finally {
                         try {
-                            fis = new FileInputStream(fileInfo.getFilePath());
-                            while ((nread = fis.read(buf)) > 0 && !detector.isDone()) {
-                                detector.handleData(buf, 0, nread);
+                            if (fis != null) {
+                                fis.close();
                             }
                         } catch (Exception e) {
                             e.printStackTrace();
-                        } finally {
-                            try {
-                                if (fis != null) {
-                                    fis.close();
-                                }
-                            } catch (Exception e) {
-                                e.printStackTrace();
-                            }
                         }
-                        detector.dataEnd();
-                        String preEncoding = detector.getDetectedCharset();
-                        final String encoding = preEncoding != null ? preEncoding : "UTF-8";
-                        // Fix issue "Not on FX application thread"
-                            Platform.runLater(() -> {
-                                fileInfo.setSourceEncoding(encoding);
-                            });
-                            detector.reset();
-                        });
+                    }
+                    detector.dataEnd();
+                    String preEncoding = detector.getDetectedCharset();
+                    final String encoding = preEncoding != null ? preEncoding : "UTF-8";
+                    // Fix issue "Not on FX application thread"
+                    Platform.runLater(() -> {
+                        fileInfo.setSourceEncoding(encoding);
+                    });
+                    detector.reset();
+                });
         }).start();
     }
 
@@ -377,14 +377,10 @@ public class MainPaneController extends Stage implements Initializable {
 
     private TreeViewCellController setupTreeViewController(FileInfoWrapper fileInfo) {
         TreeViewCellController treeViewCellController = new TreeViewCellController(mainApp);
-        treeViewCellController.getTreeViewCellCheckBox().textProperty()
-                .bind(Bindings.createStringBinding(new Callable<String>() {
-                    @Override
-                    public String call() throws Exception {
-                        return fileInfo.getFilePath().substring(
-                                fileInfo.getFilePath().lastIndexOf(File.separator) + 1);
-                    }
-
+        treeViewCellController.getTreeViewCellCheckBox().textProperty().bind(
+                Bindings.createStringBinding(() -> {
+                    return fileInfo.getFilePath().substring(
+                            fileInfo.getFilePath().lastIndexOf(File.separator) + 1);
                 }));
         treeViewCellController.getTreeViewCellCheckBox().selectedProperty()
                 .bindBidirectional(fileInfo.getIsConvertProperty());
@@ -432,74 +428,67 @@ public class MainPaneController extends Stage implements Initializable {
 
     @FXML
     void handleStartAction(ActionEvent event) {
-        new Thread(
-                () -> {
-                    // Start convert execution
-                    Platform.runLater(() -> {
-                        updateInternalStatue(RUNNING_STATUS.CONVERTION_EXECUTING);
-                    });
-                    fileInfoWrappers
-                            .stream()
-                            .filter(fileInfo -> {
-                                return !fileInfo.getIsDirectory()
-                                        && fileInfo.getIsConvert()
-                                        && !fileInfo.getSourceEncoding().equals(
-                                                fileInfo.getTargetEncoding())
-                                        && fileInfo.getTargetEncoding().length() > 0;
-                            })
-                            .forEachOrdered(
-                                    fileInfo -> {
-                                        String sourceFilePath, targetFilePath;
-                                        if (customOutputEnable.get()) {
-                                            sourceFilePath = fileInfo.getFilePath();
-                                            targetFilePath = Utils.getCustomConvertTargetFilePath(
-                                                    textFieldInputDir.getText(),
-                                                    textFieldOutputDir.getText(),
-                                                    fileInfo.getFilePath());
-                                            Utils.createDirIfNeeded(targetFilePath);
-                                        } else {
-                                            sourceFilePath = Utils.getDefaultConvertTargetFilePath(
-                                                    textFieldInputDir.getText(),
-                                                    fileInfo.getFilePath());
-                                            targetFilePath = fileInfo.getFilePath();
-                                            Utils.createDirIfNeeded(sourceFilePath);
-                                            Utils.copyFile(targetFilePath, sourceFilePath);
-                                        }
-                                        Utils.convertEncoding(sourceFilePath, targetFilePath,
-                                                fileInfo.getSourceEncoding(),
-                                                fileInfo.getTargetEncoding());
-                                    });
-                    // End convert execution
-                    Platform.runLater(() -> {
-                        updateInternalStatue(RUNNING_STATUS.CONVERTION_COMPLETE);
-                    });
+        new Thread(() -> {
+            // Start convert execution
+            Platform.runLater(() -> {
+                updateInternalStatue(RUNNING_STATUS.CONVERTION_EXECUTING);
+            });
+            fileInfoWrappers.stream().filter(fileInfo -> {
+                return !fileInfo.getIsDirectory()
+                        && fileInfo.getIsConvert()
+                        && !fileInfo.getSourceEncoding().equals(
+                                fileInfo.getTargetEncoding())
+                        && fileInfo.getTargetEncoding().length() > 0;
+            })
+            .forEachOrdered(fileInfo -> {
+                String sourceFilePath, targetFilePath;
+                if (customOutputEnable.get()) {
+                    sourceFilePath = fileInfo.getFilePath();
+                    targetFilePath = Utils.getCustomConvertTargetFilePath(
+                            textFieldInputDir.getText(),
+                            textFieldOutputDir.getText(),
+                            fileInfo.getFilePath());
+                    Utils.createDirIfNeeded(targetFilePath);
+                } else {
+                    sourceFilePath = Utils.getDefaultConvertTargetFilePath(
+                            textFieldInputDir.getText(),
+                            fileInfo.getFilePath());
+                    targetFilePath = fileInfo.getFilePath();
+                    Utils.createDirIfNeeded(sourceFilePath);
+                    Utils.copyFile(targetFilePath, sourceFilePath);
+                }
+                Utils.convertEncoding(sourceFilePath, targetFilePath,
+                        fileInfo.getSourceEncoding(),
+                        fileInfo.getTargetEncoding());
+            });
+            // End convert execution
+            Platform.runLater(() -> {
+                updateInternalStatue(RUNNING_STATUS.CONVERTION_COMPLETE);
+            });
 
-                }).start();
+        }).start();
 
     }
 
     @FXML
     void handleFilterAction(ActionEvent event) {
         if (fileInfoWrappers != null) {
-            fileInfoWrappers
-                    .stream()
-                    .filter(fileInfo -> !fileInfo.getIsDirectory())
-                    .forEachOrdered(
-                            fileInfo -> {
-                                String extension = Utils.getFileNameExtension(fileInfo
-                                        .getFilePath());
-                                if ((filterAllEnable.get())
-                                        || (filterJavaEnable.get() && extension.equals("java"))
-                                        || (filterPropertiesEnable.get() && extension
-                                                .equals("properties"))
-                                        || (filterXMLEnable.get() && extension.equals("xml"))) {
-                                    fileInfo.setIsConvert(true);
-                                } else {
-                                    fileInfo.setIsConvert(false);
-                                }
-                            });
+            fileInfoWrappers.stream()
+                .filter(fileInfo -> !fileInfo.getIsDirectory())
+                .forEachOrdered(fileInfo -> {
+                    String extension = Utils.getFileNameExtension(fileInfo
+                            .getFilePath());
+                    if ((filterAllEnable.get())
+                            || (filterJavaEnable.get() && extension.equals("java"))
+                            || (filterPropertiesEnable.get() && extension
+                                    .equals("properties"))
+                            || (filterXMLEnable.get() && extension.equals("xml"))) {
+                        fileInfo.setIsConvert(true);
+                    } else {
+                        fileInfo.setIsConvert(false);
+                    }
+                });
         }
-
     }
 
     @FXML
@@ -512,23 +501,21 @@ public class MainPaneController extends Stage implements Initializable {
         String[] splittedFilter = textFieldCustomFilter.getText().split("\\s*;\\s*");
         String[] filterExtensions = Utils.getFilterExtensions(splittedFilter);
         if (fileInfoWrappers != null && filterExtensions.length > 0) {
-            fileInfoWrappers
-                    .stream()
-                    .filter(fileInfo -> !fileInfo.getIsDirectory())
-                    .forEachOrdered(
-                            fileInfo -> {
-                                String extension = Utils.getFileNameExtension(fileInfo
-                                        .getFilePath());
-                                boolean matchExtension = false;
-                                for (String filterExtension : filterExtensions) {
-                                    if (filterExtension.equals("*")
-                                            || extension.equalsIgnoreCase(filterExtension)) {
-                                        matchExtension = true;
-                                        break;
-                                    }
-                                }
-                                fileInfo.setIsConvert(matchExtension);
-                            });
+            fileInfoWrappers.stream()
+                .filter(fileInfo -> !fileInfo.getIsDirectory())
+                .forEachOrdered(fileInfo -> {
+                    String extension = Utils.getFileNameExtension(fileInfo
+                            .getFilePath());
+                    boolean matchExtension = false;
+                    for (String filterExtension : filterExtensions) {
+                        if (filterExtension.equals("*")
+                                || extension.equalsIgnoreCase(filterExtension)) {
+                            matchExtension = true;
+                            break;
+                        }
+                    }
+                    fileInfo.setIsConvert(matchExtension);
+                });
         }
     }
 
